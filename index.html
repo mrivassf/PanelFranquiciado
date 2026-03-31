@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuevo Item</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f7;
+        }
+
+        .topbar {
+            background: #1a1a2e;
+            color: white;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .staging {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info {
+            text-align: right;
+            font-size: 13px;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: #9b59b6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .main-container {
+            display: flex;
+            height: calc(100vh - 59px);
+        }
+
+        .sidebar {
+            width: 220px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            overflow-y: auto;
+        }
+
+        .sidebar-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #333;
+            border-left: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-item:hover {
+            background: #f8f8f8;
+        }
+
+        .sidebar-item.active {
+            background: #f0f0f0;
+            border-left-color: #6c5ce7;
+            color: #6c5ce7;
+            font-weight: 500;
+        }
+
+        .sidebar-item.has-submenu {
+            justify-content: space-between;
+        }
+
+        .sidebar-item-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-arrow {
+            font-size: 10px;
+            transition: transform 0.3s;
+        }
+
+        .sidebar-arrow.open {
+            transform: rotate(180deg);
+        }
+
+        .sidebar-submenu {
+            display: none;
+            background: #fafafa;
+        }
+
+        .sidebar-submenu.open {
+            display: block;
+        }
+
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .breadcrumb {
+            padding: 20px 30px;
+            font-size: 14px;
+            color: #666;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .breadcrumb a {
+            color: #6c5ce7;
+            text-decoration: none;
+        }
+
+        .page-header {
+            padding: 30px 30px 20px;
+            background: white;
+        }
+
+        .page-header h1 {
+            font-size: 28px;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .tabs-container {
+            background: white;
+            border-bottom: 2px solid #e0e0e0;
+            padding: 0 30px;
+            display: flex;
+            gap: 5px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            background: transparent;
+            position: relative;
+            top: 2px;
+        }
+
+        .tab:hover {
+            color: #333;
+            background: #f8f8f8;
+        }
+
+        .tab.active {
+            color: #6c5ce7;
+            border-bottom-color: #6c5ce7;
+            font-weight: 500;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+            background: white;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-section {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .form-grid.full {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group label .required {
+            color: #e74c3c;
+        }
+
+        .form-helper {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #6c5ce7;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .image-upload {
+            border: 2px dashed #ddd;
+            border-radius: 6px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #fafafa;
+        }
+
+        .image-upload:hover {
+            border-color: #6c5ce7;
+            background: #f8f7ff;
+        }
+
+        .image-upload-icon {
+            font-size: 48px;
+            color: #ccc;
+            margin-bottom: 10px;
+        }
+
+        .image-upload-text {
+            font-size: 14px;
+            color: #999;
+        }
+
+        .input-with-search {
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            cursor: pointer;
+        }
+
+        .sku-list {
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .sku-item {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sku-item:last-child {
+            border-bottom: none;
+        }
+
+        .sku-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .add-sku-btn {
+            background: none;
+            border: 1px dashed #6c5ce7;
+            color: #6c5ce7;
+            padding: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            width: 100%;
+            margin-top: 10px;
+            transition: all 0.2s;
+        }
+
+        .add-sku-btn:hover {
+            background: #f8f7ff;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            padding: 5px 10px;
+            font-size: 18px;
+            transition: color 0.2s;
+        }
+
+        .delete-btn:hover {
+            color: #e74c3c;
+        }
+
+        .action-buttons {
+            position: sticky;
+            bottom: 0;
+            background: white;
+            padding: 20px 30px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn {
+            padding: 11px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #666;
+            border: 1px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #f8f8f8;
+        }
+
+        .btn-primary {
+            background: #6c5ce7;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5f4fd1;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .alert {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 12px 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .alert.error {
+            background: #fff0f0;
+            border-color: #e74c3c;
+            color: #c0392b;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Top Bar -->
+    <div class="topbar">
+        <div class="topbar-left">
+            <div class="logo">smartfran cloud</div>
+            <div class="staging">(Staging)</div>
+        </div>
+        <div class="topbar-right">
+            <select
+                style="background: transparent; color: white; border: 1px solid rgba(255,255,255,0.3); padding: 5px 10px; border-radius: 4px;">
+                <option>ES</option>
+                <option>EN</option>
+            </select>
+            <div class="user-info">
+                <div>Mariela Rivas</div>
+                <div style="font-size: 11px; opacity: 0.7;">15/12/2025 12:40</div>
+                <div style="font-size: 11px; opacity: 0.7;">Gestor: Francisco Andreoli</div>
+            </div>
+            <div class="user-avatar">MR</div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-item">📊 Tableros</div>
+            
+            <div class="sidebar-item has-submenu" onclick="toggleSubmenu('submenu-catalogo', this)">
+                <div class="sidebar-item-content">📦 Catálogo</div>
+                <span class="sidebar-arrow open">▼</span>
+            </div>
+            <div id="submenu-catalogo" class="sidebar-submenu open">
+                <div class="sidebar-item" style="padding-left: 35px;">📋 Rubros</div>
+                <div class="sidebar-item" style="padding-left: 35px;">📂 SubRubros</div>
+                <div class="sidebar-item" style="padding-left: 35px;">👥 Grupos</div>
+                <div class="sidebar-item active" style="padding-left: 35px;">📦 Items</div>
+                <div class="sidebar-item" style="padding-left: 35px;">⚙️ Genéricos</div>
+            </div>
+
+            <div class="sidebar-item">💰 Listas de Precio</div>
+            
+            <div class="sidebar-item has-submenu" onclick="toggleSubmenu('submenu-franquicias', this)">
+                <div class="sidebar-item-content">🏪 Franquicias</div>
+                <span class="sidebar-arrow">▼</span>
+            </div>
+            <div id="submenu-franquicias" class="sidebar-submenu">
+                <div class="sidebar-item" style="padding-left: 35px;">👤 Franquiciados</div>
+                <div class="sidebar-item" style="padding-left: 35px;">🏷️ Razones Sociales</div>
+            </div>
+
+            <div class="sidebar-item has-submenu" onclick="toggleSubmenu('submenu-gestion', this)">
+                <div class="sidebar-item-content">⚙️ Gestión</div>
+                <span class="sidebar-arrow">▼</span>
+            </div>
+            <div id="submenu-gestion" class="sidebar-submenu">
+                <div class="sidebar-item" style="padding-left: 35px;" onclick="window.location.href='PanelFranquiciado.html'">🖥️ Panel del Franquiciado</div>
+            </div>
+
+            <div class="sidebar-item">📦 Stock</div>
+            <div class="sidebar-item">📊 Informes</div>
+            <div class="sidebar-item">🔧 Acciones Comerciales</div>
+            <div class="sidebar-item">🔒 Seguridad</div>
+            <div class="sidebar-item">⚙️ Configuración</div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content-area">
+            <div class="breadcrumb">
+                <a href="#">← Volver a Items</a>
+            </div>
+
+            <div class="page-header">
+                <h1>Nuevo Item</h1>
+                <p>Agregue o modifique un ítem al catálogo.</p>
+            </div>
+
+            <!-- Tabs Navigation -->
+            <div class="tabs-container">
+                <div class="tab active" data-tab="general">GENERAL</div>
+                <div class="tab" data-tab="stock">STOCK</div>
+                <div class="tab" data-tab="composicion">COMPOSICIÓN</div>
+                <div class="tab" data-tab="multimedia">MULTIMEDIA</div>
+                <div class="tab" data-tab="sku">SKU</div>
+                <div class="tab" data-tab="precios-venta">LISTAS DE PRECIOS DE VENTA</div>
+                <div class="tab" data-tab="precios-costo">LISTAS DE PRECIOS DE COSTO</div>
+            </div>
+
+            <!-- Tab Contents -->
+            <div class="tab-content active" data-content="general">
+                <div class="form-section">
+                    <h3 class="section-title">Datos Generales</h3>
+                    <div class="form-grid">
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label>Imagen Principal (Vista previa):</label>
+                            <div class="image-upload">
+                                <div class="image-upload-icon">🖼️</div>
+                                <div class="image-upload-text">Sin imagen principal</div>
+                                <div style="font-size: 12px; color: #bbb; margin-top: 5px;">Click para subir imagen
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label>Nombre <span class="required">*</span></label>
+                            <input type="text" placeholder="">
+                            <div class="form-helper">Indica como se designa al ítem.</div>
+                        </div>
+
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label>Descripción <span class="required">*</span></label>
+                            <textarea placeholder=""></textarea>
+                            <div class="form-helper">Texto libre para ampliar características del ítem.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="section-title">Clasificador grupo</h3>
+                    <div class="form-group">
+                        <label>Grupo <span class="required">*</span></label>
+                        <div class="input-with-search">
+                            <input type="text" placeholder="Ingrese un código o descripción">
+                            <span class="search-icon">🔍</span>
+                        </div>
+                        <div class="form-helper">Clasificador de grupo del ítem.</div>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <div class="tab-content" data-content="stock">
+                <div class="form-section">
+                    <h3 class="section-title">Datos stock</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Item Unitario</label>
+                            <div class="input-with-search">
+                                <input type="text" placeholder="Ingrese un código o descripción">
+                                <span class="search-icon">🔍</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Cantidad Unitaria</label>
+                            <input type="number" value="0" min="0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" data-content="composicion">
+                <div class="form-section">
+                    <h3 class="section-title">Composición del Item</h3>
+                    <div class="alert">
+                        <strong>ℹ️ Información:</strong> Configure los items que componen este producto.
+                    </div>
+                    <div class="form-group">
+                        <label>Items Componentes</label>
+                        <button class="add-sku-btn">+ Agregar Componente</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" data-content="multimedia">
+                <div class="form-section">
+                    <h3 class="section-title">Recursos Multimedia</h3>
+                    <div class="form-group">
+                        <label>Imágenes del Producto</label>
+                        <div class="image-upload">
+                            <div class="image-upload-icon">📷</div>
+                            <div class="image-upload-text">Arrastre imágenes aquí o haga click para seleccionar</div>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label>Videos o Enlaces</label>
+                        <input type="url" placeholder="https://youtube.com/...">
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" data-content="sku">
+                <div class="form-section">
+                    <h3 class="section-title">Skus Relacionados</h3>
+                    <div id="skuList" class="sku-list">
+                        <div class="sku-item">
+                            <div class="sku-info">
+                                <div><strong>Tipo:</strong> ClubGrido</div>
+                                <div><strong>Código:</strong> 1111111</div>
+                            </div>
+                            <button class="delete-btn" onclick="deleteSku(this)">×</button>
+                        </div>
+                    </div>
+                    <button class="add-sku-btn" onclick="addSku()">+ AGREGAR SKU</button>
+                    <div id="errorAlert" class="alert error" style="display: none; margin-top: 15px;">
+                        ⚠ Cantidad Genérico debe ser mayor a 0.
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" data-content="precios-venta">
+                <div class="form-section">
+                    <h3 class="section-title">Listas de Precios de Venta</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Lista de Precio</label>
+                            <select>
+                                <option>Seleccione una lista...</option>
+                                <option>Lista Minorista</option>
+                                <option>Lista Mayorista</option>
+                                <option>Lista Distribuidor</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Precio Base</label>
+                            <input type="number" step="0.01" placeholder="0.00">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" data-content="precios-costo">
+                <div class="form-section">
+                    <h3 class="section-title">Listas de Precios de Costo</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Proveedor</label>
+                            <select>
+                                <option>Seleccione un proveedor...</option>
+                                <option>Proveedor A</option>
+                                <option>Proveedor B</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Costo</label>
+                            <input type="number" step="0.01" placeholder="0.00">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn btn-secondary" onclick="goBack()">
+                    ← Anterior
+                </button>
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="cancel()">Cancelar</button>
+                    <button class="btn btn-primary" id="nextBtn" onclick="nextTab()">Siguiente →</button>
+                    <button class="btn btn-primary" id="saveBtn" onclick="saveItem()"
+                        style="display: none;">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTabIndex = 0;
+        const tabs = ['general', 'stock', 'composicion', 'multimedia', 'sku', 'precios-venta', 'precios-costo'];
+
+        function switchTab(index) {
+            currentTabIndex = index;
+
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach((tab, i) => {
+                tab.classList.toggle('active', i === index);
+            });
+
+            // Update content
+            document.querySelectorAll('.tab-content').forEach((content, i) => {
+                content.classList.toggle('active', i === index);
+            });
+
+            // Update buttons
+            const nextBtn = document.getElementById('nextBtn');
+            const saveBtn = document.getElementById('saveBtn');
+
+            if (index === tabs.length - 1) {
+                nextBtn.style.display = 'none';
+                saveBtn.style.display = 'inline-block';
+            } else {
+                nextBtn.style.display = 'inline-block';
+                saveBtn.style.display = 'none';
+            }
+
+            // Scroll to top
+            document.querySelector('.content-area').scrollTop = 0;
+        }
+
+        function nextTab() {
+            if (currentTabIndex < tabs.length - 1) {
+                switchTab(currentTabIndex + 1);
+            }
+        }
+
+        function goBack() {
+            if (currentTabIndex > 0) {
+                switchTab(currentTabIndex - 1);
+            }
+        }
+
+        function cancel() {
+            if (confirm('¿Está seguro que desea cancelar? Se perderán todos los cambios no guardados.')) {
+                alert('Operación cancelada');
+                window.location.href = '#items';
+            }
+        }
+
+        function saveItem() {
+            const errorAlert = document.getElementById('errorAlert');
+            const skuList = document.querySelectorAll('.sku-item');
+
+            if (skuList.length === 0) {
+                errorAlert.style.display = 'block';
+                switchTab(3); // Go to SKU tab
+                return;
+            }
+
+            errorAlert.style.display = 'none';
+            alert('✅ Item guardado exitosamente');
+        }
+
+        function addSku() {
+            const skuList = document.getElementById('skuList');
+            const newSku = document.createElement('div');
+            newSku.className = 'sku-item';
+            newSku.innerHTML = `
+                <div class="sku-info">
+                    <div><strong>Tipo:</strong> <select style="border: 1px solid #ddd; padding: 5px; border-radius: 3px;">
+                        <option value="">Seleccione...</option>
+                        <option>ClubGrido</option>
+                        <option>Producto</option>
+                        <option>Servicio</option>
+                    </select></div>
+                    <div><strong>Código:</strong> <input type="text" style="border: 1px solid #ddd; padding: 5px; border-radius: 3px; width: 150px;" placeholder="Código"></div>
+                </div>
+                <button class="delete-btn" onclick="deleteSku(this)">×</button>
+            `;
+            skuList.appendChild(newSku);
+        }
+
+        function deleteSku(btn) {
+            if (confirm('¿Está seguro que desea eliminar este SKU?')) {
+                btn.closest('.sku-item').remove();
+            }
+        }
+
+        // Tab click handlers
+        document.querySelectorAll('.tab').forEach((tab, index) => {
+            tab.addEventListener('click', () => switchTab(index));
+        });
+
+        // Submenu toggle handler
+        function toggleSubmenu(submenuId, element) {
+            const submenu = document.getElementById(submenuId);
+            const arrow = element.querySelector('.sidebar-arrow');
+            
+            submenu.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+
+</html>
