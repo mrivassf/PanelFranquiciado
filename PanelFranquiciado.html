@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel del Franquiciado</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f7;
+        }
+
+        .topbar {
+            background: #1a1a2e;
+            color: white;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .staging {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info {
+            text-align: right;
+            font-size: 13px;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: #9b59b6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .main-container {
+            display: flex;
+            height: calc(100vh - 59px);
+        }
+
+        .sidebar {
+            width: 220px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            overflow-y: auto;
+        }
+
+        .sidebar-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #333;
+            border-left: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-item:hover {
+            background: #f8f8f8;
+        }
+
+        .sidebar-item.active {
+            background: #f0f0f0;
+            border-left-color: #6c5ce7;
+            color: #6c5ce7;
+            font-weight: 500;
+        }
+
+        .sidebar-item.has-submenu {
+            justify-content: space-between;
+        }
+
+        .sidebar-item-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-arrow {
+            font-size: 10px;
+            transition: transform 0.3s;
+        }
+
+        .sidebar-arrow.open {
+            transform: rotate(180deg);
+        }
+
+        .sidebar-submenu {
+            display: none;
+            background: #fafafa;
+        }
+
+        .sidebar-submenu.open {
+            display: block;
+        }
+
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .breadcrumb {
+            padding: 20px 30px;
+            font-size: 14px;
+            color: #666;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .breadcrumb a {
+            color: #6c5ce7;
+            text-decoration: none;
+        }
+
+        .page-header {
+            padding: 30px 30px 20px;
+            background: white;
+        }
+
+        .page-header h1 {
+            font-size: 28px;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .tabs-container {
+            background: white;
+            border-bottom: 2px solid #e0e0e0;
+            padding: 0 30px;
+            display: flex;
+            gap: 5px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            background: transparent;
+            position: relative;
+            top: 2px;
+        }
+
+        .tab:hover {
+            color: #333;
+            background: #f8f8f8;
+        }
+
+        .tab.active {
+            color: #6c5ce7;
+            border-bottom-color: #6c5ce7;
+            font-weight: 500;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+            background: white;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-section {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .form-grid.full {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group label .required {
+            color: #e74c3c;
+        }
+
+        .form-helper {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #6c5ce7;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Top Bar -->
+    <div class="topbar">
+        <div class="topbar-left">
+            <div class="logo">smartfran cloud</div>
+            <div class="staging">(Staging)</div>
+        </div>
+        <div class="topbar-right">
+            <select
+                style="background: transparent; color: white; border: 1px solid rgba(255,255,255,0.3); padding: 5px 10px; border-radius: 4px;">
+                <option>ES</option>
+                <option>EN</option>
+            </select>
+            <div class="user-info">
+                <div>Mariela Rivas</div>
+                <div style="font-size: 11px; opacity: 0.7;">15/12/2025 12:40</div>
+                <div style="font-size: 11px; opacity: 0.7;">Gestor: Francisco Andreoli</div>
+            </div>
+            <div class="user-avatar">MR</div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-item">📊 Tableros</div>
+
+            <div class="sidebar-item has-submenu" onclick="toggleSubmenu('submenu-catalogo', this)">
+                <div class="sidebar-item-content">📦 Catálogo</div>
+                <span class="sidebar-arrow">▼</span>
+            </div>
+            <div id="submenu-catalogo" class="sidebar-submenu">
+                <div class="sidebar-item" style="padding-left: 35px;">📋 Rubros</div>
+                <div class="sidebar-item" style="padding-left: 35px;">📂 SubRubros</div>
+                <div class="sidebar-item" style="padding-left: 35px;">👥 Grupos</div>
+                <div class="sidebar-item" style="padding-left: 35px;" onclick="window.location.href='Items.html'">📦
+                    Items</div>
+                <div class="sidebar-item" style="padding-left: 35px;">⚙️ Genéricos</div>
+            </div>
+
+            <div class="sidebar-item">💰 Listas de Precio</div>
+
+            <div class="sidebar-item has-submenu" onclick="toggleSubmenu('submenu-franquicias', this)">
+                <div class="sidebar-item-content">🏪 Franquicias</div>
+                <span class="sidebar-arrow">▼</span>
+            </div>
+            <div id="submenu-franquicias" class="sidebar-submenu">
+                <div class="sidebar-item" style="padding-left: 35px;">👤 Franquiciados</div>
+                <div class="sidebar-item" style="padding-left: 35px;">🏷️ Razones Sociales</div>
+            </div>
+
+            <div class="sidebar-item has-submenu" onclick="toggleSubmenu('submenu-gestion', this)">
+                <div class="sidebar-item-content">⚙️ Gestión</div>
+                <span class="sidebar-arrow open">▼</span>
+            </div>
+            <div id="submenu-gestion" class="sidebar-submenu open">
+                <div class="sidebar-item active" style="padding-left: 35px;">🖥️ Panel del Franquiciado</div>
+            </div>
+
+            <div class="sidebar-item">📦 Stock</div>
+            <div class="sidebar-item">📊 Informes</div>
+            <div class="sidebar-item">🔧 Acciones Comerciales</div>
+            <div class="sidebar-item">🔒 Seguridad</div>
+            <div class="sidebar-item">⚙️ Configuración</div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content-area">
+
+
+            <div class="page-header">
+                <h1>Panel del Franquiciado</h1>
+                <p>Gestione la información y configuración de sus franquicias.</p>
+            </div>
+
+            <!-- Tabs Navigation -->
+            <div class="tabs-container">
+                <div class="tab active" data-tab="franquiciado">FRANQUICIADO</div>
+                <div class="tab" data-tab="franquicias">FRANQUICIAS</div>
+                <div class="tab" data-tab="puntos-venta" id="tab-puntos-venta" style="display: none;">PUNTOS DE VENTA
+                </div>
+            </div>
+
+            <div class="tab-content active" data-content="franquiciado" id="form-franquiciado">
+                <div class="form-section">
+                    <h3 class="section-title">Datos Personales</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nombre</label>
+                            <input type="text" value="Francisco" id="fq-nombre" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Apellido</label>
+                            <input type="text" value="Andreoli" id="fq-apellido" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo de Documento</label>
+                            <select id="fq-tipo-doc" disabled>
+                                <option selected>DNI</option>
+                                <option>Pasaporte</option>
+                                <option>CUIT/CUIL</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Número de Documento</label>
+                            <input type="text" value="33254789" id="fq-num-doc" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Sexo</label>
+                            <select id="fq-sexo" disabled>
+                                <option selected>Masculino</option>
+                                <option>Femenino</option>
+                                <option>Otro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha de Nacimiento</label>
+                            <input type="date" id="fq-fecha-nac" value="1980-01-01" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="section-title">Ubicación Geográfica</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>País</label>
+                            <select id="fq-pais" disabled>
+                                <option selected>Argentina</option>
+                                <option>Chile</option>
+                                <option>Uruguay</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Provincia</label>
+                            <input type="text" value="Córdoba" id="fq-provincia" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Ciudad</label>
+                            <input type="text" value="Córdoba" id="fq-localidad" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Barrio</label>
+                            <input type="text" value="Centro" id="fq-barrio" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Calle</label>
+                            <input type="text" value="Av. Colon" id="fq-calle" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Número</label>
+                            <input type="text" value="123" id="fq-numero" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Piso</label>
+                            <input type="text" value="1" id="fq-piso" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Departamento</label>
+                            <input type="text" value="A" id="fq-depto" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Código Postal (CP)</label>
+                            <input type="text" value="5000" id="fq-cp" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Zona Horaria</label>
+                            <select id="fq-zona-hor" disabled>
+                                <option selected>UTC-3 (Buenos Aires)</option>
+                                <option>UTC-4 (Santiago)</option>
+                                <option>UTC-5 (Lima)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="section-title">Contacto</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Número de Teléfono</label>
+                            <input type="tel" value="351245469" id="fq-telefono" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Email <span title="Esta cuenta sera utilizada para envios de correo con cierre de turno y accesos a BI" style="cursor: help; margin-left: 5px; color: #6c5ce7; font-size: 14px;">ℹ️</span></label>
+                            <input type="email" value="franciscoa@smartfran.com" id="fq-email" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" data-content="franquicias">
+                <div class="form-section">
+                    <h3 class="section-title">Franquicias Asociadas</h3>
+                    <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Seleccione una franquicia para ver sus
+                        puntos de venta asociados.</p>
+                    <style>
+                        .dropdown {
+                            position: relative;
+                            display: inline-block;
+                        }
+
+                        .dropdown-content {
+                            display: none;
+                            position: absolute;
+                            right: 0;
+                            background-color: #fff;
+                            min-width: 160px;
+                            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+                            z-index: 10;
+                            border-radius: 6px;
+                            border: 1px solid #eee;
+                            overflow: hidden;
+                        }
+
+                        .dropdown-content a {
+                            color: #555;
+                            padding: 12px 16px;
+                            text-decoration: none;
+                            display: block;
+                            font-size: 13px;
+                            transition: background 0.2s;
+                        }
+
+                        .dropdown-content a:hover {
+                            background-color: #f8f8f8;
+                            color: #6c5ce7;
+                        }
+
+                        .dropdown:hover .dropdown-content {
+                            display: block;
+                        }
+
+                        .dropdown-btn {
+                            background: none;
+                            border: none;
+                            cursor: pointer;
+                            font-size: 20px;
+                            padding: 0 10px;
+                            color: #666;
+                            font-weight: bold;
+                            transition: color 0.2s;
+                        }
+
+                        .dropdown-btn:hover {
+                            color: #333;
+                        }
+                    </style>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                        <thead>
+                            <tr style="background: #f8f8f8; border-bottom: 2px solid #e0e0e0; text-align: left;">
+                                <th style="padding: 12px; font-size: 13px; color: #555;">ID</th>
+                                <th style="padding: 12px; font-size: 13px; color: #555;">Nombre de Franquicia</th>
+                                <th style="padding: 12px; font-size: 13px; color: #555;">Ubicación</th>
+                                <th style="padding: 12px; font-size: 13px; color: #555;">Fecha de Activación</th>
+                                <th style="padding: 12px; font-size: 13px; color: #555;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom: 1px solid #e0e0e0; background: white; cursor: pointer;"
+                                onclick="verPuntosVenta('FR-001', 'Sucursal Centro')"
+                                onmouseover="this.style.backgroundColor='#f8f8ff'"
+                                onmouseout="this.style.backgroundColor='white'">
+                                <td style="padding: 12px; font-size: 14px;">FR-001</td>
+                                <td style="padding: 12px; font-size: 14px;">Sucursal Centro</td>
+                                <td style="padding: 12px; font-size: 14px;">Av. Principal 123, Cordoba, Argentina</td>
+                                <td style="padding: 12px; font-size: 14px;"><input type="date" value="2021-05-10"
+                                        readonly
+                                        style="border: none; background: transparent; font-family: inherit; font-size: 14px; color: inherit;">
+                                </td>
+                                <td style="padding: 12px;">
+                                    <div class="dropdown" onclick="event.stopPropagation();">
+                                        <button class="dropdown-btn">⋮</button>
+                                        <div class="dropdown-content">
+                                            <a href="#" onclick="event.preventDefault(); editarFranquicia('FR-001')">Ver
+                                                franquicia</a>
+                                            <a href="#"
+                                                onclick="event.preventDefault(); verPuntosVenta('FR-001', 'Sucursal Centro')">Ver
+                                                puntos de venta</a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #e0e0e0; background: white; cursor: pointer;"
+                                onclick="verPuntosVenta('FR-002', 'Sucursal Norte')"
+                                onmouseover="this.style.backgroundColor='#f8f8ff'"
+                                onmouseout="this.style.backgroundColor='white'">
+                                <td style="padding: 12px; font-size: 14px;">FR-002</td>
+                                <td style="padding: 12px; font-size: 14px;">Sucursal Norte</td>
+                                <td style="padding: 12px; font-size: 14px;">Av. Norte 456, Cordoba, Argentina</td>
+                                <td style="padding: 12px; font-size: 14px;"><input type="date" value="2022-08-15"
+                                        readonly
+                                        style="border: none; background: transparent; font-family: inherit; font-size: 14px; color: inherit;">
+                                </td>
+                                <td style="padding: 12px;">
+                                    <div class="dropdown" onclick="event.stopPropagation();">
+                                        <button class="dropdown-btn">⋮</button>
+                                        <div class="dropdown-content">
+                                            <a href="#" onclick="event.preventDefault(); editarFranquicia('FR-002')">Ver
+                                                franquicia</a>
+                                            <a href="#"
+                                                onclick="event.preventDefault(); verPuntosVenta('FR-002', 'Sucursal Norte')">Ver
+                                                puntos de venta</a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+            <div class="tab-content" data-content="puntos-venta">
+                <div class="form-section" id="pdv-empty-state"
+                    style="padding: 40px; text-align: center; color: #666; background: #fafafa; border-radius: 6px; border: 1px dashed #ccc;">
+                    <p style="font-size: 15px; margin-bottom: 10px;">No se ha seleccionado ninguna franquicia.</p>
+                    <p style="font-size: 13px;">Regrese a la solapa "Franquicias" y haga clic en "POS" para ver sus
+                        puntos de venta asociados.</p>
+                </div>
+
+                <div class="form-section" id="pdv-container" style="display: none;">
+                    <h3 class="section-title">Puntos de Venta Asociados: <span id="pdv-franquicia-nombre"
+                            style="color: #6c5ce7;"></span></h3>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                        <thead>
+                            <tr style="background: #f8f8f8; border-bottom: 2px solid #e0e0e0; text-align: left;">
+                                <th style="padding: 12px; font-size: 13px; color: #555;">ID PDV</th>
+                                <th style="padding: 12px; font-size: 13px; color: #555;">Nombre</th>
+                                <th style="padding: 12px; font-size: 13px; color: #555;">Estado</th>
+                                <th style="padding: 12px; font-size: 13px; color: #555;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pdv-table-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-content" data-content="editar-franquicia" id="form-editar-franquicia">
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
+                    <button class="btn btn-primary"
+                        onclick="verPuntosVenta(document.getElementById('ef-id-display').textContent, document.getElementById('ef-nombre-display').textContent)">🏪
+                        Ver puntos de venta</button>
+                    <button class="btn"
+                        style="margin-left: 10px; background: #eee; border: 1px solid #ccc; padding: 10px 15px; border-radius: 4px; cursor: pointer;"
+                        onclick="switchTab(1)">⬅️ Volver</button>
+                </div>
+
+                <h2 style="margin-bottom: 20px; color: #333;">Detalle de Franquicia: <span id="ef-id-display"
+                        style="color: #6c5ce7;"></span> - <span id="ef-nombre-display" style="color: #6c5ce7;"></span></h2>
+
+
+
+                <div class="form-section">
+                    <h3 class="section-title">Ubicación Geográfica</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>País</label>
+                            <select id="ef-pais" disabled>
+                                <option>Argentina</option>
+                                <option>Chile</option>
+                                <option>Uruguay</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Provincia</label>
+                            <input type="text" id="ef-provincia" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Ciudad</label>
+                            <input type="text" id="ef-localidad" readonly>
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label>Dirección</label>
+                            <input type="text" id="ef-direccion" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Código Postal (CP)</label>
+                            <input type="text" id="ef-cp" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Zona Horaria</label>
+                            <select id="ef-zona-hor" disabled>
+                                <option selected>UTC-3 (Buenos Aires)</option>
+                                <option>UTC-4 (Santiago)</option>
+                                <option>UTC-5 (Lima)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Tab content: Editar PDV -->
+            <div class="tab-content" data-content="editar-pdv" id="form-editar-pdv">
+                <style>
+                    .switch-toggle {
+                        position: relative;
+                        display: inline-block;
+                        width: 44px;
+                        height: 24px;
+                    }
+
+                    .switch-toggle input {
+                        opacity: 0;
+                        width: 0;
+                        height: 0;
+                    }
+
+                    .switch-toggle span.slider {
+                        position: absolute;
+                        cursor: pointer;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background-color: #ccc;
+                        transition: .4s;
+                        border-radius: 24px;
+                    }
+
+                    .switch-toggle span.slider:before {
+                        position: absolute;
+                        content: "";
+                        height: 18px;
+                        width: 18px;
+                        left: 3px;
+                        bottom: 3px;
+                        background-color: white;
+                        transition: .4s;
+                        border-radius: 50%;
+                    }
+
+                    .switch-toggle input:checked+span.slider {
+                        background-color: #6c5ce7;
+                    }
+
+                    .switch-toggle input:checked+span.slider:before {
+                        transform: translateX(20px);
+                    }
+                </style>
+
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
+                    <button class="btn btn-primary" onclick="guardarEdicionPDV()">💾 Guardar Cambios</button>
+                    <button class="btn"
+                        style="margin-left: 10px; background: #eee; border: 1px solid #ccc; padding: 10px 15px; border-radius: 4px; cursor: pointer;"
+                        onclick="cancelarEdicionPDV()">❌ Cancelar</button>
+                </div>
+
+                <h2 style="margin-bottom: 20px; color: #333;">Editando Punto de Venta: <span id="ep-id-display"
+                        style="color: #6c5ce7;"></span></h2>
+
+                <div class="form-section">
+                    <h3 class="section-title">Datos del POS</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nombre</label>
+                            <input type="text" id="ep-nombre">
+                        </div>
+                        <div class="form-group">
+                            <label>Descripción</label>
+                            <input type="text" id="ep-descripcion">
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo de Moneda</label>
+                            <select id="ep-moneda" disabled>
+                                <option>ARS - Peso Argentino</option>
+                                <option>USD - Dólar Estadounidense</option>
+                                <option>CLP - Peso Chileno</option>
+                                <option>UYU - Peso Uruguayo</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Lista de Precio</label>
+                            <select id="ep-lista-precio" disabled>
+                                <option>LP01 - Lista General</option>
+                                <option>LP02 - Lista Mayorista</option>
+                                <option>LP03 - Lista Promocional</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="section-title">Cierre Ciego</h3>
+                    <div class="form-grid">
+                        <div class="form-group"
+                            style="flex-direction: row; align-items: center; justify-content: space-between;">
+                            <label style="margin-bottom: 0;">Cierre ciego</label>
+                            <label class="switch-toggle">
+                                <input type="checkbox" id="ep-cierre-ciego">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="section-title">Alarma de retiro</h3>
+                    <div class="form-grid">
+                        <div class="form-group"
+                            style="flex-direction: row; align-items: center; justify-content: space-between;">
+                            <label style="margin-bottom: 0;">Mostrar alerta en POS</label>
+                            <label class="switch-toggle">
+                                <input type="checkbox" id="ep-mostrar-alerta">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="form-group"
+                            style="flex-direction: row; align-items: center; justify-content: space-between;">
+                            <label style="margin-bottom: 0;">Bloquea panel de venta al alcanzar el límite</label>
+                            <label class="switch-toggle">
+                                <input type="checkbox" id="ep-bloquea-venta">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>Monto límite de la alarma</label>
+                            <input type="number" id="ep-alarma-retiro">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let currentTabIndex = 0;
+        const tabs = ['franquiciado', 'franquicias', 'puntos-venta', 'editar-franquicia', 'editar-pdv'];
+
+        const pdvData = {
+            'FR-001': [
+                { id: 'PDV-101', nombre: 'Caja 1 - Centro', estado: 'Activo' },
+                { id: 'PDV-102', nombre: 'Caja 2 - Centro', estado: 'Activo' }
+            ],
+            'FR-002': [
+                { id: 'PDV-201', nombre: 'Delivery - Norte', estado: 'Activo' }
+            ]
+        };
+
+        function verPuntosVenta(id, nombre) {
+            const container = document.getElementById('pdv-container');
+            const emptyState = document.getElementById('pdv-empty-state');
+            const titleSpan = document.getElementById('pdv-franquicia-nombre');
+            const tbody = document.getElementById('pdv-table-body');
+
+            titleSpan.textContent = nombre;
+            tbody.innerHTML = '';
+
+            if (pdvData[id]) {
+                pdvData[id].forEach(pdv => {
+                    tbody.innerHTML += `
+                        <tr style="border-bottom: 1px solid #e0e0e0; background: white;">
+                            <td style="padding: 12px; font-size: 14px;">${pdv.id}</td>
+                            <td style="padding: 12px; font-size: 14px;">${pdv.nombre}</td>
+                            <td style="padding: 12px;"><span style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${pdv.estado}</span></td>
+                            <td style="padding: 12px;"><button style="background: none; border: none; color: #6c5ce7; cursor: pointer;" onclick="editarPDV('${pdv.id}', '${pdv.nombre}')">Editar</button></td>
+                        </tr>
+                    `;
+                });
+                emptyState.style.display = 'none';
+                container.style.display = 'block';
+            } else {
+                emptyState.style.display = 'block';
+                container.style.display = 'none';
+            }
+
+            // Mostrar el botón de la solapa PUNTOS DE VENTA y cambiar hacia ella
+            document.getElementById('tab-puntos-venta').style.display = 'block';
+            switchTab(2);
+        }
+
+        function editarFranquicia(id) {
+            document.getElementById('ef-id-display').textContent = id;
+            // Datos simulados
+            if (id === 'FR-001') {
+                document.getElementById('ef-nombre-display').textContent = 'Sucursal Centro';
+                document.getElementById('ef-provincia').value = 'Córdoba';
+                document.getElementById('ef-localidad').value = 'Córdoba';
+                document.getElementById('ef-direccion').value = 'Av. Principal 123';
+                document.getElementById('ef-cp').value = '5000';
+            } else {
+                document.getElementById('ef-nombre-display').textContent = 'Sucursal Norte';
+                document.getElementById('ef-provincia').value = 'Córdoba';
+                document.getElementById('ef-localidad').value = 'Córdoba';
+                document.getElementById('ef-direccion').value = 'Av. Norte 456';
+                document.getElementById('ef-cp').value = '5009';
+            }
+
+            switchTab(3);
+        }
+
+        function guardarEdicionFranquicia() {
+            alert('Cambios guardados exitosamente.');
+            switchTab(1);
+        }
+
+        function cancelarEdicionFranquicia() {
+            switchTab(1);
+        }
+
+        function editarPDV(id, nombre) {
+            document.getElementById('ep-id-display').textContent = id;
+            document.getElementById('ep-nombre').value = nombre;
+
+            // Datos simulados por defecto
+            document.getElementById('ep-descripcion').value = 'Punto de venta principal en funcionamiento';
+            document.getElementById('ep-moneda').value = 'ARS - Peso Argentino';
+            document.getElementById('ep-lista-precio').value = 'LP01 - Lista General';
+            document.getElementById('ep-cierre-ciego').checked = true;
+            document.getElementById('ep-mostrar-alerta').checked = true;
+            document.getElementById('ep-alarma-retiro').value = 50000;
+            document.getElementById('ep-bloquea-venta').checked = false;
+
+            switchTab(4); // Índice del nuevo tab editar-pdv
+        }
+
+        function guardarEdicionPDV() {
+            alert('Cambios del PDV guardados exitosamente.');
+            switchTab(2); // Vuelve a PUNTOS DE VENTA
+        }
+
+        function cancelarEdicionPDV() {
+            switchTab(2); // Vuelve a PUNTOS DE VENTA
+        }
+
+        function switchTab(index) {
+            currentTabIndex = index;
+
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach((tab, i) => {
+                tab.classList.toggle('active', i === index);
+            });
+
+            // Update content
+            document.querySelectorAll('.tab-content').forEach((content, i) => {
+                content.classList.toggle('active', i === index);
+            });
+        }
+
+        // Submenu toggle handler
+        function toggleSubmenu(submenuId, element) {
+            const submenu = document.getElementById(submenuId);
+            const arrow = element.querySelector('.sidebar-arrow');
+
+            if (submenu) {
+                submenu.classList.toggle('open');
+            }
+            if (arrow) {
+                arrow.classList.toggle('open');
+            }
+        }
+
+        // Tab click handlers
+        document.querySelectorAll('.tab').forEach((tab, index) => {
+            tab.addEventListener('click', () => switchTab(index));
+        });
+    </script>
+</body>
+
+</html>
