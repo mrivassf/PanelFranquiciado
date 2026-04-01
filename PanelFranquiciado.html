@@ -973,6 +973,16 @@
                 }
             }
 
+            // Cierre de turno - confirmación de cierre ciego
+            document.getElementById('ep-cierre-ciego').addEventListener('change', function () {
+                if (this.checked) {
+                    const mensaje = "Cuando está funcion esta activada, el colaborador no visualiza los montos totales al realizar el cierre de turno.\n¿Desea continuar?";
+                    if (!confirm(mensaje)) {
+                        this.checked = false;
+                    }
+                }
+            });
+
             // Alarma de retiro - confirmación de bloqueo
             document.getElementById('ep-bloquear-panel').addEventListener('change', function () {
                 if (this.checked) {
